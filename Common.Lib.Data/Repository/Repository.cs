@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Common.Lib.Contract;
-using Common.Lib.Data.Models;
+using Common.Lib.Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Common.Lib.Data.Repository

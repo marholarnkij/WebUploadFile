@@ -4,4 +4,9 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Common.Lib.Contract\Common.Lib.Contract.csproj" />
+    <ProjectReference Include="..\Common.Lib.Data\Common.Lib.Data.csproj" />
+  </ItemGroup>
+
 </Project>

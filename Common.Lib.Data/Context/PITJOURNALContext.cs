@@ -2,7 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
-namespace Common.Lib.Data.Models
+using Common.Lib.Entities.Models;
+namespace Common.Lib.Data.Context
 {
     public partial class PITJOURNALContext : DbContext
     {

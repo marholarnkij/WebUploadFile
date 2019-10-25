@@ -8,7 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
+using Common.Lib.Data.Context;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 namespace WebUploadFile
 {
     public class Startup
@@ -23,7 +25,11 @@ namespace WebUploadFile
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string connectionString = Configuration.GetConnectionString("DataContext");
+            services.AddDbContext<PITJOURNALContext>(options => options.UseSqlServer(connectionString));
+            services.AddAutoMapper(typeof(Startup));
             services.AddMvc();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
