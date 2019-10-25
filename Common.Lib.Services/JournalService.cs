@@ -18,9 +18,19 @@ namespace Common.Lib.Services
 
         private IConfiguration Configuration { get; set; }
 
+        public IQueryable<JournalDetails> GetAll()
+        {
+            return unitOfWork.JournalDetailsRepository.GetAll();
+        }
+
         public  IQueryable<JournalDetails> GetByCurrency(string currency)
         {
             return unitOfWork.JournalDetailsRepository.GetAll(e => e.CurrencyCode == currency);
+        }
+
+        public IQueryable<JournalDetails> GetByStatus(string status)
+        {
+            return unitOfWork.JournalDetailsRepository.GetAll(e => e.Status == status);
         }
     }
 }
