@@ -1,0 +1,9 @@
+[
+  {
+    "TransactionIdentifier": "Invoice0000001",
+    "Amount": "1,000.00",
+    "CurrencyCode": "USD",
+    "TransactionDate": "01/02/2019 12:33:16",
+    "Status": "Approved"
+  }
+]

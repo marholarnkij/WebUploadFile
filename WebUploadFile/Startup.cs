@@ -11,6 +11,9 @@ using Microsoft.Extensions.Options;
 using Common.Lib.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Microsoft.AspNetCore.ResponseCompression;
+using WebUploadFile.Formatters;
+
 namespace WebUploadFile
 {
     public class Startup
@@ -25,6 +28,16 @@ namespace WebUploadFile
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var csvFormatterOptions = new CsvFormatterOptions();
+            csvFormatterOptions.CsvDelimiter = ",";
+
+            services.AddResponseCompression(options =>
+            {
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "text/csv" });
+            });
+
+             
+             
             string connectionString = Configuration.GetConnectionString("DataContext");
             services.AddDbContext<PITJOURNALContext>(options => options.UseSqlServer(connectionString));
             services.AddAutoMapper(typeof(Startup));

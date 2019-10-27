@@ -10,6 +10,8 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using WebUploadFile.Filters;
 using System;
+using Common.Lib.Entities.InputModels;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebUploadFile.Controllers
 {
@@ -106,8 +108,8 @@ namespace WebUploadFile.Controllers
             var results = new List<JournalReturnModel>();
             try
             {
-                string mapstatus ="";
-                if(status.ToLower() == "approved" || status.ToLower() == "a")
+                string mapstatus = "";
+                if (status.ToLower() == "approved" || status.ToLower() == "a")
                 {
                     mapstatus = "A";
                 }
@@ -169,7 +171,7 @@ namespace WebUploadFile.Controllers
                 }
                 if (results.Count == 0)
                 {
-                    _logger.LogInformation("Not found date range :" + fromdate.ToString()  + " and " + todate.ToString());
+                    _logger.LogInformation("Not found date range :" + fromdate.ToString() + " and " + todate.ToString());
                     return NotFound();
                 }
             }
@@ -187,6 +189,44 @@ namespace WebUploadFile.Controllers
                 return new ValidationFailedResult(ModelState);
             }
             return new ObjectResult(results);
+        }
+
+        [HttpPost]
+        [Route("CreateJournal")]
+        public IActionResult CreateJournal([FromBody]List<JournalInput> items)
+        {
+            int counter = 0;
+            if (items != null)
+            {
+                foreach (var item in items)
+                {
+                    counter++;
+                    var t = _mapper.Map<JournalInput, JournalDetails>(item);
+                    if (ValidateItem(item))
+                    {
+                        journalService.Createjournal(t);
+                        _logger.LogInformation(string.Format("{0}:{1} - Journal was created.", counter.ToString(), t.TransactionId));
+                    }
+                }
+            }
+            if (ModelState.ErrorCount > 0)
+            {
+                IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in allErrors)
+                {
+                    _logger.LogError(error.ErrorMessage == "" ? error.Exception.Message : error.ErrorMessage);
+                }
+                return new ValidationFailedResult(ModelState);
+            }
+            return StatusCode(200);
+        }
+    
+        private bool ValidateItem(object p)
+        {
+            List<ValidationResult> res = new List<ValidationResult>();
+            System.ComponentModel.DataAnnotations.ValidationContext validateContexts = new System.ComponentModel.DataAnnotations.ValidationContext(p, null, null);
+            bool IsValid = Validator.TryValidateObject(p, validateContexts, res, true);
+            return IsValid;
         }
     }
 }

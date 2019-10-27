@@ -39,5 +39,13 @@ namespace Common.Lib.Services
             return unitOfWork.JournalDetailsRepository
                 .GetAll(e => e.TransactionDate >= fromdate && e.TransactionDate <= todate);
         }
+
+        public void Createjournal(JournalDetails item)
+        {
+            unitOfWork.BeginSave();
+            unitOfWork.JournalDetailsRepository.Create(item);
+            unitOfWork.Commit();
+
+        }
     }
 }
