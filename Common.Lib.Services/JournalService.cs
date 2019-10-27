@@ -2,6 +2,7 @@
 
 using Common.Lib.Entities.Models;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Linq;
 
 namespace Common.Lib.Services
@@ -31,6 +32,12 @@ namespace Common.Lib.Services
         public IQueryable<JournalDetails> GetByStatus(string status)
         {
             return unitOfWork.JournalDetailsRepository.GetAll(e => e.Status == status);
+        }
+
+        public IQueryable<JournalDetails> GetByDateRange(DateTime fromdate, DateTime todate)
+        {
+            return unitOfWork.JournalDetailsRepository
+                .GetAll(e => e.TransactionDate >= fromdate && e.TransactionDate <= todate);
         }
     }
 }

@@ -7,6 +7,9 @@ using Common.Lib.Entities.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Linq;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
+using WebUploadFile.Filters;
+using System;
 
 namespace WebUploadFile.Controllers
 {
@@ -17,13 +20,13 @@ namespace WebUploadFile.Controllers
         private readonly JournalService journalService;
         private IConfiguration Configuration { get; set; }
         private readonly IMapper _mapper;
-        //private readonly ILogger<UploadFileController> _logger;
+        private readonly ILogger<JournalController> _logger;
 
-        public JournalController(IConfiguration configuration, IMapper mapper)//, ILogger<InventoryController> logger)
+        public JournalController(IConfiguration configuration, IMapper mapper, ILogger<JournalController> logger)
         {
             Configuration = configuration;
             _mapper = mapper;
-            //_logger = logger;
+            _logger = logger;
 
             journalService = new JournalService(Configuration);
         }
@@ -48,12 +51,12 @@ namespace WebUploadFile.Controllers
             }
             if (ModelState.ErrorCount > 0)
             {
-                //IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
-                //foreach (var error in allErrors)
-                //{
-                //    _logger.LogError(error.ErrorMessage);
-                //}
-                //return new ValidationFailedResult(ModelState);
+                IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in allErrors)
+                {
+                    _logger.LogError(error.ErrorMessage);
+                }
+                return new ValidationFailedResult(ModelState);
             }
             return new ObjectResult(results);
         }
@@ -73,6 +76,11 @@ namespace WebUploadFile.Controllers
                     result = _mapper.Map<JournalDetails, JournalReturnModel>(item);
                     results.Add(result);
                 }
+                if (results.Count == 0)
+                {
+                    _logger.LogInformation("Not found currency :" + currency.ToString());
+                    return NotFound();
+                }
             }
             catch (System.Exception ex)
             {
@@ -80,12 +88,12 @@ namespace WebUploadFile.Controllers
             }
             if (ModelState.ErrorCount > 0)
             {
-                //IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
-                //foreach (var error in allErrors)
-                //{
-                //    _logger.LogError(error.ErrorMessage);
-                //}
-                //return new ValidationFailedResult(ModelState);
+                IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in allErrors)
+                {
+                    _logger.LogError(error.ErrorMessage);
+                }
+                return new ValidationFailedResult(ModelState);
             }
             return new ObjectResult(results);
         }
@@ -98,12 +106,33 @@ namespace WebUploadFile.Controllers
             var results = new List<JournalReturnModel>();
             try
             {
-                var list = journalService.GetByStatus(status);
+                string mapstatus ="";
+                if(status.ToLower() == "approved" || status.ToLower() == "a")
+                {
+                    mapstatus = "A";
+                }
+
+                if (status.ToLower() == "failed" || status.ToLower() == "rejected" || status.ToLower() == "r")
+                {
+                    mapstatus = "R";
+                }
+
+                if (status.ToLower() == "finished" || status.ToLower() == "done" || status.ToLower() == "d")
+                {
+                    mapstatus = "D";
+                }
+
+                var list = journalService.GetByStatus(mapstatus);
                 foreach (var item in list)
                 {
                     var result = new JournalReturnModel();
                     result = _mapper.Map<JournalDetails, JournalReturnModel>(item);
                     results.Add(result);
+                }
+                if (results.Count == 0)
+                {
+                    _logger.LogInformation("Not found status :" + status.ToString());
+                    return NotFound();
                 }
             }
             catch (System.Exception ex)
@@ -112,12 +141,50 @@ namespace WebUploadFile.Controllers
             }
             if (ModelState.ErrorCount > 0)
             {
-                //IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
-                //foreach (var error in allErrors)
-                //{
-                //    _logger.LogError(error.ErrorMessage);
-                //}
-                //return new ValidationFailedResult(ModelState);
+                IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in allErrors)
+                {
+                    _logger.LogError(error.ErrorMessage);
+                }
+                return new ValidationFailedResult(ModelState);
+            }
+            return new ObjectResult(results);
+        }
+
+
+        // GET: api/Journal/GetByDateRange/
+        [HttpGet("DateRange/{fromdate}/{todate}", Name = "GetByDateRange")]
+        [Route("DateRange")]
+        public IActionResult GetByDateRange(DateTime fromdate, DateTime todate)
+        {
+            var results = new List<JournalReturnModel>();
+            try
+            {
+                var list = journalService.GetByDateRange(fromdate, todate);
+                foreach (var item in list)
+                {
+                    var result = new JournalReturnModel();
+                    result = _mapper.Map<JournalDetails, JournalReturnModel>(item);
+                    results.Add(result);
+                }
+                if (results.Count == 0)
+                {
+                    _logger.LogInformation("Not found date range :" + fromdate.ToString()  + " and " + todate.ToString());
+                    return NotFound();
+                }
+            }
+            catch (System.Exception ex)
+            {
+                ModelState.AddModelError(ex.Source, ex.Message);
+            }
+            if (ModelState.ErrorCount > 0)
+            {
+                IEnumerable<ModelError> allErrors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in allErrors)
+                {
+                    _logger.LogError(error.ErrorMessage);
+                }
+                return new ValidationFailedResult(ModelState);
             }
             return new ObjectResult(results);
         }
