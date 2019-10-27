@@ -7,6 +7,7 @@ using Common.Lib.Entities.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Linq;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 
 namespace WebUploadFile.Controllers
 {
@@ -17,23 +18,19 @@ namespace WebUploadFile.Controllers
         private readonly JournalService journalService;
         private IConfiguration Configuration { get; set; }
         private readonly IMapper _mapper;
-        //private readonly ILogger<UploadFileController> _logger;
+        private readonly ILogger<UploadFileController> _logger;
 
-        public UploadFileController(IConfiguration configuration, IMapper mapper)//, ILogger<InventoryController> logger)
+        public UploadFileController(IConfiguration configuration, IMapper mapper, ILogger<UploadFileController> logger)
         {
             Configuration = configuration;
             _mapper = mapper;
-            //_logger = logger;
+            _logger = logger;
 
             journalService = new JournalService(Configuration);
         }
-        // GET: api/UploadFile
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
 
+         
+        
         
         // POST: api/UploadFile
         [HttpPost]
@@ -41,16 +38,6 @@ namespace WebUploadFile.Controllers
         {
         }
         
-        // PUT: api/UploadFile/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
         
-        //// DELETE: api/ApiWithActions/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>2C2P-Uploader</title>
+</head>
+<body>
+    <h1>Uploading a File</h1>
+    <form action=" ">
+        <input type="file"
+               id="fileupload"
+               accept=".csv,.xml" onchange="return checkfile(this);">
+        <br />
+        <input type="submit" value="submit">
+    </form>
+    
+
+    <script type="text/javascript" language="javascript">
+        function checkfile(sender) {
+
+            var validExts = new Array(".csv", ".xml");
+            var fileExt = sender.value;
+            var filesize = document.getElementById('fileupload').files[0].size;
+             
+            fileExt = fileExt.substring(fileExt.lastIndexOf('.'));
+            if (validExts.indexOf(fileExt) <= 0) {
+                alert("Unknown format");
+                return false;
+            }
+            else if (filesize > 1024) {
+                alert("File size is over limitation of 1MB");
+                return false;
+            }
+             
+            else return true;
+        }
+    </script>
+
+</body>
+</html>
