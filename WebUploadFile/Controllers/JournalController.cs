@@ -198,19 +198,16 @@ namespace WebUploadFile.Controllers
             int counter = 0;
             if (item != null)
             {
-                //    foreach (var item in items)
-                //    {
                 counter++;
-                //var t = _mapper.Map<JournalInput, JournalDetails>(item);
                 var t = new JournalDetails
                 {
                     TransactionId = item.TransactionIdentifier,
                     Amount = item.Amount,
                     CurrencyCode = item.CurrencyCode,
                     TransactionDate = item.TransactionDate,
-                    Status = item.Status  == "Failed" ? "F" :
-                    item.Status.ToLower() == "Approved" ? "A" :
-                    item.Status.ToLower() == "Finished" ? "D" : "X",
+                    Status = item.Status  == "Failed" || item.Status == "Rejected" ? "F" :
+                    item.Status == "Approved" ? "A" :
+                    item.Status == "Finished"  || item.Status == "Done" ? "D" : "X",
                     CreatedDate = DateTime.Now,
                     ModifiedDate = DateTime.Now
                 };
@@ -219,7 +216,6 @@ namespace WebUploadFile.Controllers
                     journalService.Createjournal(t);
                     _logger.LogInformation(string.Format("{0}:{1} - Journal was created.", counter.ToString(), t.TransactionId));
                 }
-                //}
             }
             if (ModelState.ErrorCount > 0)
             {
