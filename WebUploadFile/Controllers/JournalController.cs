@@ -193,21 +193,33 @@ namespace WebUploadFile.Controllers
 
         [HttpPost]
         [Route("CreateJournal")]
-        public IActionResult CreateJournal([FromBody]List<JournalInput> items)
+        public IActionResult CreateJournal([FromBody]JournalInput item)
         {
             int counter = 0;
-            if (items != null)
+            if (item != null)
             {
-                foreach (var item in items)
+                //    foreach (var item in items)
+                //    {
+                counter++;
+                //var t = _mapper.Map<JournalInput, JournalDetails>(item);
+                var t = new JournalDetails
                 {
-                    counter++;
-                    var t = _mapper.Map<JournalInput, JournalDetails>(item);
-                    if (ValidateItem(item))
-                    {
-                        journalService.Createjournal(t);
-                        _logger.LogInformation(string.Format("{0}:{1} - Journal was created.", counter.ToString(), t.TransactionId));
-                    }
+                    TransactionId = item.TransactionIdentifier,
+                    Amount = item.Amount,
+                    CurrencyCode = item.CurrencyCode,
+                    TransactionDate = item.TransactionDate,
+                    Status = item.Status  == "Failed" ? "F" :
+                    item.Status.ToLower() == "Approved" ? "A" :
+                    item.Status.ToLower() == "Finished" ? "D" : "X",
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.Now
+                };
+                if (ValidateItem(item))
+                {
+                    journalService.Createjournal(t);
+                    _logger.LogInformation(string.Format("{0}:{1} - Journal was created.", counter.ToString(), t.TransactionId));
                 }
+                //}
             }
             if (ModelState.ErrorCount > 0)
             {

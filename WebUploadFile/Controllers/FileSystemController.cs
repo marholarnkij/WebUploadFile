@@ -34,20 +34,7 @@ namespace WebUploadFile.Controllers
 
 
 
-        [HttpPost]
-        [Route("import")]
-        public IActionResult Import([FromBody]List<JournalInput> value)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            else
-            {
-                
-                return Ok();
-            }
-        }
+        
 
 
     }
