@@ -12,6 +12,7 @@ using WebUploadFile.Filters;
 using System;
 using Common.Lib.Entities.InputModels;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace WebUploadFile.Controllers
 {
@@ -205,13 +206,13 @@ namespace WebUploadFile.Controllers
                     Amount = item.Amount,
                     CurrencyCode = item.CurrencyCode,
                     TransactionDate = item.TransactionDate,
-                    Status = item.Status  == "Failed" || item.Status == "Rejected" ? "F" :
+                    Status = item.Status  == "Failed" || item.Status == "Rejected" ? "R" :
                     item.Status == "Approved" ? "A" :
                     item.Status == "Finished"  || item.Status == "Done" ? "D" : "X",
                     CreatedDate = DateTime.Now,
                     ModifiedDate = DateTime.Now
                 };
-                if (ValidateItem(item))
+                if (ValidateJournal(t) && ValidateItem(item))
                 {
                     journalService.Createjournal(t);
                     _logger.LogInformation(string.Format("{0}:{1} - Journal was created.", counter.ToString(), t.TransactionId));
@@ -228,7 +229,27 @@ namespace WebUploadFile.Controllers
             }
             return StatusCode(200);
         }
-    
+
+        private bool ValidateJournal(JournalDetails item)
+        {
+            bool result = true;
+            if (item.CurrencyCode != string.Empty)
+            {
+                IEnumerable<string> currencySymbols = CultureInfo.GetCultures(CultureTypes.SpecificCultures) //Only specific cultures contain region information
+                .Select(x => (new RegionInfo(x.LCID)).ISOCurrencySymbol)
+                .Distinct()
+                .OrderBy(x => x);
+
+                if (!currencySymbols.Contains(item.CurrencyCode))
+                {
+                    ModelState.AddModelError("Currency Code", string.Format("{0} - Invalid Currency Code", item.CurrencyCode));
+                    return false;
+                }
+            }
+            
+            return result;
+        }
+
         private bool ValidateItem(object p)
         {
             List<ValidationResult> res = new List<ValidationResult>();
