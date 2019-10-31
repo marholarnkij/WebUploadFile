@@ -44,39 +44,41 @@
                     if (typeof (FileReader) != "undefined") {
                         var reader = new FileReader();
                         reader.onload = function (e) {
-                            var lines = [];
+                            var items = [];
                             var rows = e.target.result.split("\n");
                             for (var i = 0; i < rows.length; i++) {
                                 var cells = rows[i].split(",");
                                 var row = {
-                                    "TransactionIdentifier": cells[0],
-                                    "Amount": cells[1],
-                                    "CurrencyCode": cells[2],
-                                    "TransactionDate": cells[3],
-                                    "Status": cells[4]
+                                    "TransactionIdentifier": cells[0].replace("\"", "").replace("\"", ""),
+                                    "Amount": cells[1].replace("\"", "").replace("\"", ""),
+                                    "CurrencyCode": cells[2].replace("\"", "").replace("\"", "").trim(),
+                                    "TransactionDate": cells[3].replace("\"", "").replace("\"", ""),
+                                    "Status": cells[4].replace("\"", "").replace("\"", "").trim()
                                 }
-                                $.ajax({
-                                    url: 'http://localhost:1491/api/Journal/CreateJournal',
-                                    type: 'POST',
-                                    data: JSON.stringify(row),
-                                    contentType: "application/json;",
-                                    success: function (data) {
-                                        if (data.Success == true) {
-                                            alert(data);
-                                        }
-                                        else {
-                                            
-                                        }
-
-                                    },
-                                    error: function () {
-                                        alert(JSON.stringify(row));
-                                    },
-                                    complete: function () {
-                                    }
-                                });
-                                
+                                items.push(row);
                             }
+                            $.ajax({
+                                url: 'http://localhost:1491/api/Journal/CreateJournal',
+                                type: 'POST',
+                                data: JSON.stringify(items),
+                                contentType: "application/json;",
+                                success: function (data) {
+                                    if (data.Success == true) {
+                                        alert(data);
+                                    }
+                                    else {
+                                       
+                                    }
+
+                                },
+                                error: function () {
+                                    alert(JSON.stringify(row));
+                                },
+                                complete: function () {
+                                }
+                            });
+                                
+                            
                         }
                         reader.readAsText(fileUpload.files[0]);
                         return true;
@@ -94,13 +96,14 @@
                     if (typeof (FileReader) != "undefined") {
                         var reader = new FileReader();
                         reader.onload = function (e) {
+                            var items = [];
                             readXml = e.target.result;
                             console.log(readXml);
                             var parser = new DOMParser();
                             var doc = parser.parseFromString(readXml, "application/xml");
                             var trans = doc.getElementsByTagName("Transaction");
                             for (var i = 0; i < trans.length; i++) {
-                                
+
                                 var row = {
                                     "TransactionIdentifier": trans[i].getAttribute("id"),
                                     "Amount": doc.getElementsByTagName("Amount")[i].childNodes[0].data,
@@ -108,31 +111,32 @@
                                     "TransactionDate": doc.getElementsByTagName("TransactionDate")[i].childNodes[0].data,
                                     "Status": doc.getElementsByTagName("Status")[i].childNodes[0].data
                                 };
+                                items.push(row);
 
-                                
-                             
-                                $.ajax({
-                                    url: 'http://localhost:1491/api/Journal/CreateJournal',
-                                    type: 'POST',
-                                    data: JSON.stringify(row),
-                                    contentType: "application/json;",
-                                    success: function (data) {
-                                        if (data.Success == true) {
-                                            alert(data);
-                                        }
-                                        else {
-                                            
-                                        }
-
-                                    },
-                                    error: function () {
-                                        alert(JSON.stringify(row));
-                                    },
-                                    complete: function () {
-                                    }
-                                });
-                                 
                             }
+                             
+                            $.ajax({
+                                url: 'http://localhost:1491/api/Journal/CreateJournal',
+                                type: 'POST',
+                                data: JSON.stringify(items),
+                                contentType: "application/json;",
+                                success: function (data) {
+                                    if (data.Success == true) {
+                                        alert(data);
+                                    }
+                                    else {
+
+                                    }
+
+                                },
+                                error: function () {
+                                    alert(JSON.stringify(row));
+                                },
+                                complete: function () {
+                                }
+                            });
+                                 
+                            
 
                         }
                         reader.readAsText(fileUpload.files[0]);

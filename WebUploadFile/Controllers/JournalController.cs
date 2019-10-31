@@ -194,28 +194,34 @@ namespace WebUploadFile.Controllers
 
         [HttpPost]
         [Route("CreateJournal")]
-        public IActionResult CreateJournal([FromBody]JournalInput item)
+        public IActionResult CreateJournal([FromBody]List<JournalInput> items)
         {
             int counter = 0;
-            if (item != null)
+            if (items != null)
             {
                 counter++;
-                var t = new JournalDetails
+                foreach (var item in items)
                 {
-                    TransactionId = item.TransactionIdentifier,
-                    Amount = item.Amount,
-                    CurrencyCode = item.CurrencyCode,
-                    TransactionDate = item.TransactionDate,
-                    Status = item.Status  == "Failed" || item.Status == "Rejected" ? "R" :
-                    item.Status == "Approved" ? "A" :
-                    item.Status == "Finished"  || item.Status == "Done" ? "D" : "X",
-                    CreatedDate = DateTime.Now,
-                    ModifiedDate = DateTime.Now
-                };
-                if (ValidateJournal(t) && ValidateItem(item))
-                {
-                    journalService.Createjournal(t);
-                    _logger.LogInformation(string.Format("{0}:{1} - Journal was created.", counter.ToString(), t.TransactionId));
+                    if (ValidateJournal(item))
+                    {
+                        var t = new JournalDetails
+                        {
+                            TransactionId = item.TransactionIdentifier,
+                            Amount = item.Amount,
+                            CurrencyCode = item.CurrencyCode,
+                            TransactionDate = ConvertToDateTime(item.TransactionDate),
+                            Status = item.Status == "Approved" ? "A" :
+                                    (item.Status == "Failed" || item.Status == "Rejected") ? "R" :
+                                    (item.Status == "Finished" || item.Status == "Done") ? "D" : "X",
+                            CreatedDate = DateTime.Now,
+                            ModifiedDate = DateTime.Now
+                        };
+                        if (ValidateItem(item))
+                        {
+                            journalService.Createjournal(t);
+                            _logger.LogInformation(string.Format("{0}:{1} - Journal was created.", counter.ToString(), t.TransactionId));
+                        }
+                    }
                 }
             }
             if (ModelState.ErrorCount > 0)
@@ -230,7 +236,23 @@ namespace WebUploadFile.Controllers
             return StatusCode(200);
         }
 
-        private bool ValidateJournal(JournalDetails item)
+        private DateTime ConvertToDateTime(string transactionDate)
+        {
+            DateTime dt;
+            if (transactionDate.IndexOf("-") > 0)
+            {
+                DateTime.TryParseExact(transactionDate, "yyyy-MM-ddTHH:mm:ss",
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out dt);
+            }
+            else
+            {
+                DateTime.TryParseExact(transactionDate, "dd/MM/yyyy hh:mm:ss",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out dt);
+            }
+            return dt;
+        }
+
+        private bool ValidateJournal(JournalInput item)
         {
             bool result = true;
             if (item.CurrencyCode != string.Empty)
@@ -243,6 +265,22 @@ namespace WebUploadFile.Controllers
                 if (!currencySymbols.Contains(item.CurrencyCode))
                 {
                     ModelState.AddModelError("Currency Code", string.Format("{0} - Invalid Currency Code", item.CurrencyCode));
+                    return false;
+                }
+                DateTime dt;
+                if (item.TransactionDate.IndexOf("-") > 0)
+                {
+                    DateTime.TryParseExact(item.TransactionDate, "yyyy-MM-ddTHH:mm:ss",
+                            CultureInfo.InvariantCulture, DateTimeStyles.None, out dt);
+                }
+                else
+                {
+                     DateTime.TryParseExact(item.TransactionDate, "dd/MM/yyyy hh:mm:ss", 
+                         CultureInfo.InvariantCulture, DateTimeStyles.None, out dt);
+                }
+                if (dt == DateTime.MinValue)
+                {
+                    ModelState.AddModelError("Transaction Date", string.Format("{0} - Invalid DateTime format", item.TransactionDate));
                     return false;
                 }
             }

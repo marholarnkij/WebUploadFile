@@ -15,17 +15,12 @@ namespace WebUploadFile.Mapper
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
             CreateMap<JournalInput, JournalDetails>()
                 .ForMember(dest => dest.TransactionId, opt => opt.MapFrom(src => src.TransactionIdentifier))
-
-
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
-                 ((src.Status.ToLower() == "approved") ? "A" :
-                 (src.Status.ToLower() == "failed") ? "R" :
-                 (src.Status.ToLower() == "finish") ? "D" : "")));
-
-                //.ForMember(dest => dest.CreatedDate, opt =>
-                //opt.MapFrom(src => System.DateTime.Now))
-                //.ForMember(dest => dest.ModifiedDate, opt =>
-                //opt.MapFrom(src => System.DateTime.Now));
+                 ((src.Status == "Approved") ? "A" :
+                 (src.Status == "Failed" || src.Status == "Rejected") ? "R" :
+                 (src.Status == "Finished" || src.Status == "Done") ? "D" : "x")))
+                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => System.DateTime.Now))
+                .ForMember(dest => dest.ModifiedDate, opt => opt.MapFrom(src => System.DateTime.Now));
 
         }
     }
